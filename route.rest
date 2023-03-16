@@ -1,0 +1,12 @@
+GET http://localhost:3000/table
+
+###
+
+POST http://localhost:3000/table
+Content-Type: application/json
+
+{
+  "tableNr": 3,
+  "capacity": 20,
+  "status": true
+}

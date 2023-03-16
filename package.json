@@ -1,0 +1,38 @@
+{
+  "name": "verteiltesystemeadm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon main.js",
+    "dev:client": "vite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcelmatic/verteiltesystemeADM.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcelmatic/verteiltesystemeADM/issues"
+  },
+  "homepage": "https://github.com/marcelmatic/verteiltesystemeADM#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.1",
+    "restify": "^11.1.0",
+    "vite": "^4.1.4",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "dotenv": "^16.0.3",
+    "nodemon": "^2.0.21",
+    "vite-plugin-html": "^3.2.0"
+  }
+}

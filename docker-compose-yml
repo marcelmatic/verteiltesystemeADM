@@ -1,0 +1,9 @@
+version: "3"
+services:
+  web:
+    image: nginx
+    ports:
+      - "80:80"
+  app:
+    env_file:
+      - .env
