@@ -16,13 +16,28 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Route for creating a new user
+// Route for getting all tables
+router.get("/:status", async (req, res) => {
+  try {
+    const status = req.params.status;
+    const table = await Table.find({ status: status });
+    if (!table) {
+      return res.status(404).json({ error: "Table not found" });
+    }
+    return res.json(table);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to get table" });
+  }
+});
+
+// Route for creating a new table
 router.post("/", async (req, res) => {
   try {
-    // Get the user data from the request body
+    // Get the table data from the request body
     const { tableNr, capacity, status } = req.body;
 
-    // Create a new user document with the hashed password
+    // Create a new table document with the hashed password
     const table = await Table.create({
       tableNr,
       capacity,
@@ -39,6 +54,46 @@ router.post("/", async (req, res) => {
     } else {
       res.status(500).json({ error: "Failed to create table" });
     }
+  }
+});
+
+// Route for updating an existing table
+router.patch("/:id", async (req, res) => {
+  try {
+    const table = await Table.findByIdAndUpdate(
+      req.params.id,
+      {
+        tableNr: req.body.tableNr,
+        capacity: req.body.capacity,
+        status: req.body.status,
+      },
+      { new: true }
+    );
+
+    if (!table) {
+      return res.status(404).json({ message: "Table not found" });
+    }
+
+    res.json(table);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Route for deleting an existing table
+router.delete("/:id", async (req, res) => {
+  try {
+    const table = await Table.findByIdAndDelete(req.params.id);
+
+    if (!table) {
+      return res.status(404).json({ message: "Table not found" });
+    }
+
+    res.json(table);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

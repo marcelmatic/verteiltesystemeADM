@@ -14,28 +14,23 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body>
-    <div class="container-fluid vh-100">
-      <div class="row vh-100">
-        <nav class="col-md-2 bg-light sidebar d-flex flex-column">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  aria-current="page"
-                  href="/"
-                  data-link
-                  >Anmeldung</a
-                >
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/tische" data-link>Tischverwaltung</a>
-              </li>
-            </ul>
-          </div>
-          <div class="mt-auto"></div>
-        </nav>
-        <div id="app" class="col-md-10">
+    <div class="container-fluid ">
+      <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/" data-link
+                >Anmeldung</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/tische" data-link>Tischverwaltung</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="row mt-5">
+        <div id="app" class="col-12">
           <!-- Your main content goes here -->
         </div>
       </div>
@@ -53,6 +48,5 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script type="module" src="static/src/router.js"></script>
-
   </body>
 </html>

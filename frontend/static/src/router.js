@@ -1,5 +1,9 @@
-import Login from "./views/Login.js";
-import Table, { setLoggedIn } from "./views/Table.js";
+import Login, { setLogged } from "./views/Login.js";
+import Table, {
+  setLoggedIn,
+  getTables,
+  getTablesStatus,
+} from "./views/Table.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -69,15 +73,45 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       userHinzuf(e);
     }
+    if (e.target.matches("[button-tischHinzu]")) {
+      e.preventDefault();
+      tischHinzufügen();
+      resetSelect();
+    }
     if (e.target.matches("[ausloggen-button]")) {
       e.preventDefault();
       setLoggedIn(false);
+      setLogged(false);
 
       navigateTo(e.target.href);
+    }
+    if (e.target.matches("[select-table]")) {
+      document
+        .getElementById("showTable")
+        .addEventListener("change", (event) => {
+          const selectElement = event.target;
+          const selectedIndex = selectElement.selectedIndex;
+          const selectedOption = selectElement.options[selectedIndex];
+          const selectedText = selectedOption.text;
+
+          if (selectedText === "frei") {
+            getTablesStatus("false");
+          } else if (selectedText === "besetzt") {
+            getTablesStatus("true");
+          } else {
+            getTables();
+          }
+        });
     }
   });
   router();
 });
+
+export function resetSelect() {
+  const selectbox = document.getElementById("showTable");
+
+  selectbox.selectedIndex = 0;
+}
 
 // Definiere eine Funktion mit dem Namen "anmelden"
 function anmelden(e) {
@@ -104,6 +138,7 @@ function anmelden(e) {
       console.log("SUIII");
       // navigate to /table route
       setLoggedIn(true);
+      setLogged(true);
 
       navigateTo(e.target.href);
     },
@@ -155,6 +190,50 @@ async function userHinzuf(e) {
         //alertExists(); // rufe eine Funktion auf, um den Benutzer zu informieren, dass der Benutzername bereits vorhanden ist
       } else {
         console.log("Failed to create user."); // gib eine Fehlermeldung in der Konsole aus
+      }
+    },
+  });
+}
+
+async function tischHinzufügen() {
+  const tableNr = document.getElementById("new-table-nr").value;
+  const capacity = document.getElementById("new-table-capacity").value;
+
+  // Führe eine AJAX-Anfrage an den Server aus, um einen neuen Benutzer hinzuzufügen
+  $.ajax({
+    url: "http://localhost:3000/table", // die URL des Endpunkts für das Hinzufügen eines Benutzers
+    method: "POST", // die HTTP-Methode für die Anfrage
+    contentType: "application/json", // Der Typ des zu sendenden Inhalts ist JSON
+    data: JSON.stringify({
+      tableNr: tableNr, // Der Benutzername wird als JSON-Daten an den Server gesendet
+      capacity: capacity, // Das Passwort wird als JSON-Daten an den Server gesendet
+      status: false,
+    }),
+    success: function (data) {
+      // Wenn das Hinzufügen des Benutzers erfolgreich war, wird eine "success"-Funktion aufgerufen
+      // get the form element
+
+      alert("Tisch erfolgreich angelegt!"); // display a popup message
+
+      console.log("Table created successfully:", data); // gib eine Erfolgsmeldung in der Konsole aus
+      $("#addTableModal").modal("hide"); // hide the modal
+      getTables();
+
+      document.getElementById("new-table-nr").value = "";
+      document.getElementById("new-table-capacity").value = "";
+    },
+    error: function (jqXHR) {
+      // Wenn das Hinzufügen des Benutzers fehlschlägt, wird eine "error"-Funktion aufgerufen
+      console.log(jqXHR); // gib die Details des Fehlers in der Konsole aus
+      if (
+        jqXHR.status === 400 && // wenn der Fehlerstatus 400 ist
+        jqXHR.responseJSON && // und wenn es eine Antwort als JSON gibt
+        jqXHR.responseJSON.error === "Table number already exists" // und wenn der Benutzername bereits vorhanden ist
+      ) {
+        console.log("TableNr already exists"); // gib eine Fehlermeldung in der Konsole aus
+        alert("TischNr existiert bereits!");
+      } else {
+        console.log("Failed to create table."); // gib eine Fehlermeldung in der Konsole aus
       }
     },
   });

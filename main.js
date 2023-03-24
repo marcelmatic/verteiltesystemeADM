@@ -27,7 +27,7 @@ mongoose.set("strictQuery", false); // Set the strictQuery option to false to al
 mongoose.connect(process.env.MONGODB_CONN, { useNewUrlParser: true });
 const db = mongoose.connection;
 db.on("error", (error) => logger.error(error)); // Log any connection errors
-db.once("open", () => logger.info("Connected to Database")); // Log a message when the connection is established
+db.once("open", () => console.log("Connected to Database")); // Log a message when the connection is established
 
 // Use the Express.json() middleware to parse incoming request data as JSON
 app.use(express.json());
@@ -70,4 +70,4 @@ app.get("/*", (req, res) => {
 });
 
 // Set up the server to listen on port 3000
-app.listen(process.env.PORT, () => logger.info("Connected to Server"));
+app.listen(process.env.PORT, () => console.log("Connected to Server"));
