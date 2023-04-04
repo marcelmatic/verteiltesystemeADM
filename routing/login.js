@@ -1,40 +1,40 @@
-// Import necessary dependencies
-const express = require("express"); // Import the Express library
-const router = express.Router(); // Create a new router instance
-const User = require("../schemas/login"); // Import the User model
-const bcrypt = require("bcrypt"); // import bcrypt for crypting the passwords
+// Importiere notwendige Abhängigkeiten
+const express = require("express"); // Importiere die Express-Bibliothek
+const router = express.Router(); // Erstelle eine neue Router-Instanz
+const User = require("../schemas/login"); // Importiere das User-Modell
+const bcrypt = require("bcrypt"); // Importiere bcrypt zum Verschlüsseln von Passwörtern
 const path = require("path");
 
-// Route for getting all users
+// Route zum Abrufen aller Benutzer
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find();
-    res.send(users);
+    const users = await User.find(); // Suche alle Benutzer in der Datenbank
+    res.send(users); // Sende alle gefundenen Benutzer als Antwort
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
   }
 });
 
-// Route for creating a new user
+// Route zum Erstellen eines neuen Benutzers
 router.post("/", async (req, res) => {
   try {
-    // Get the user data from the request body
+    // Hole die Benutzerdaten aus dem Request-Body
     const { username, password } = req.body;
 
-    // Hash the password
+    // Hashe das Passwort
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user document with the hashed password
+    // Erstelle ein neues Benutzerdokument mit dem gehashten Passwort
     const newUser = await User.create({
       username,
       password: hashedPassword,
     });
 
-    // Return the new user document as the response
+    // Sende das neue Benutzerdokument als Antwort
     res.json(newUser);
   } catch (error) {
-    // Handle any errors that occur during user creation
+    // Behandle Fehler, die während der Benutzererstellung auftreten
     if (error.code === 11000 && error.keyPattern.username) {
       res.status(400).json({ error: "Username already exists" });
     } else {
@@ -44,32 +44,30 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Route for user login
+// Route für die Benutzeranmeldung
 router.post("/login", async (req, res) => {
   try {
-    // Get the user data from the request body
+    // Hole die Benutzerdaten aus dem Request-Body
     const { username, password } = req.body;
 
-    // Find the user by username
+    // Suche den Benutzer nach Benutzername
     const user = await User.findOne({ username: username });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Compare the entered password with the hashed password
+    // Vergleiche das eingegebene Passwort mit dem gehashten Passwort
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid password" });
     }
 
     return res.json(user);
-
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Failed to log in" });
   }
 });
 
-// Export the router module
+// Exportiere das Router-Modul
 module.exports = router;

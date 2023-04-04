@@ -1,3 +1,4 @@
+// Importiere die Login- und Tabelle-Module
 import Login, { setLogged } from "./views/Login.js";
 import Table, {
   setLoggedIn,
@@ -5,14 +6,17 @@ import Table, {
   getTablesStatus,
 } from "./views/Table.js";
 
+// Definiere eine Funktion, die einen regulären Ausdruck für einen Pfad erstellt
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
+// Definiere eine Funktion, um die Seite zu navigieren
 export const navigateTo = (url) => {
   history.pushState(null, null, url);
   router();
 };
 
+// Definiere eine Funktion, um die Parameter eines Übereinstimmungsergebnisses zu erhalten
 const getParams = (match) => {
   const values = match.result.slice(1);
   const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
@@ -26,13 +30,15 @@ const getParams = (match) => {
   );
 };
 
+// Definiere die Router-Funktion
 const router = async () => {
+  // Definiere eine Liste von Routen und deren zugehörige Ansichten
   const routes = [
     { path: "/", view: Login },
     { path: "/tische", view: Table },
   ];
 
-  // Test each route for potential match
+  // Teste jede Route auf mögliche Übereinstimmungen
   const potentialMatches = routes.map((route) => {
     return {
       route: route,
@@ -40,10 +46,12 @@ const router = async () => {
     };
   });
 
+  // Finde die erste Übereinstimmung
   let match = potentialMatches.find(
     (potentialMatch) => potentialMatch.result !== null
   );
 
+  // Wenn keine Übereinstimmung gefunden wird, verwende die erste Route
   if (!match) {
     match = {
       route: routes[0],
@@ -51,49 +59,61 @@ const router = async () => {
     };
   }
 
+  // Erstelle die Ansicht und aktualisiere den HTML-Inhalt der Seite
   const view = new match.route.view(getParams(match));
-
   document.getElementById("app").innerHTML = await view.getHtml();
 };
 
+// Füge einen Event-Listener hinzu, um den Router bei Änderungen des Browserverlaufs aufzurufen
 window.addEventListener("popstate", router);
 
+// Wenn das Dokument vollständig geladen ist, führe den Router aus und füge Event-Listener für die Navigation hinzu
 document.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("click", (e) => {
+    // Wenn auf einen Link geklickt wird, verhindere das Standardverhalten und navigiere zu der angegebenen URL
     if (e.target.matches("[data-link]")) {
       e.preventDefault();
       navigateTo(e.target.href);
     }
+
+    // Wenn auf den Anmeldebutton geklickt wird, führe die Anmeldungsfunktion aus
     if (e.target.matches("[anmelde-button]")) {
       console.log("MATCH");
       e.preventDefault();
       anmelden(e);
     }
+
+    // Wenn auf den Registrierungsbutton geklickt wird, füge einen neuen Benutzer hinzu
     if (e.target.matches("[registrieren-button]")) {
       e.preventDefault();
       userHinzuf(e);
     }
+    // Wenn der Button "Tisch hinzufügen" geklickt wurde
     if (e.target.matches("[button-tischHinzu]")) {
-      e.preventDefault();
-      tischHinzufügen();
-      resetSelect();
+      e.preventDefault(); // Verhindert das Standardverhalten des Buttons, um die Seite nicht neu zu laden
+      tischHinzufügen(); // Fügt einen neuen Tisch hinzu
+      resetSelect(); // Setzt die Auswahlbox zurück
     }
-    if (e.target.matches("[ausloggen-button]")) {
-      e.preventDefault();
-      setLoggedIn(false);
-      setLogged(false);
 
-      navigateTo(e.target.href);
+    // Wenn der Button "Ausloggen" geklickt wurde
+    if (e.target.matches("[ausloggen-button]")) {
+      e.preventDefault(); // Verhindert das Standardverhalten des Buttons, um die Seite nicht neu zu laden
+      setLoggedIn(false); // Setzt den Anmeldestatus des Benutzers auf "nicht angemeldet"
+      setLogged(false); // Setzt den Anmeldestatus des Benutzers auf "nicht angemeldet"
+      navigateTo(e.target.href); // Navigiert zum Ausloggen
     }
+    // Wenn die Auswahlbox "Tisch anzeigen" geändert wurde
     if (e.target.matches("[select-table]")) {
+      // Fügt einen Event-Listener hinzu, um auf Änderungen in der Auswahlbox zu reagieren
       document
         .getElementById("showTable")
         .addEventListener("change", (event) => {
-          const selectElement = event.target;
-          const selectedIndex = selectElement.selectedIndex;
-          const selectedOption = selectElement.options[selectedIndex];
-          const selectedText = selectedOption.text;
+          const selectElement = event.target; // Das Element, auf das die Event-Listener-Funktion aufgerufen wurde (in diesem Fall die Auswahlbox)
+          const selectedIndex = selectElement.selectedIndex; // Der Index des ausgewählten Elements in der Auswahlbox
+          const selectedOption = selectElement.options[selectedIndex]; // Das ausgewählte Element in der Auswahlbox
+          const selectedText = selectedOption.text; // Der Text des ausgewählten Elements
 
+          // Je nach Auswahl ruft die Funktion "getTables", "getTablesStatus(false)" oder "getTablesStatus(true)" auf
           if (selectedText === "frei") {
             getTablesStatus("false");
           } else if (selectedText === "besetzt") {
@@ -104,13 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   });
-  router();
+  router(); // Führt die Router-Funktion aus, um die passende View aufzurufen
 });
 
+// Definiert eine Funktion zum Zurücksetzen der Auswahlbox
 export function resetSelect() {
-  const selectbox = document.getElementById("showTable");
+  const selectbox = document.getElementById("showTable"); // Das Element, das die Auswahlbox enthält
 
-  selectbox.selectedIndex = 0;
+  selectbox.selectedIndex = 0; // Setzt den Index des ausgewählten Elements in der Auswahlbox auf 0 zurück
 }
 
 // Definiere eine Funktion mit dem Namen "anmelden"

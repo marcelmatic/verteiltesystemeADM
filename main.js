@@ -1,11 +1,12 @@
-// Load required modules
-require("dotenv").config(); // Load environment variables from .env file
-const express = require("express"); // Use Express to create the server
-const cors = require("cors"); // Use the CORS package to enable Cross-Origin Resource Sharing
+// Lade benötigte Module
+require("dotenv").config(); // Lade Umgebungsvariablen aus der .env Datei
+const express = require("express"); // Verwende Express, um den Server zu erstellen
+const cors = require("cors"); // Verwende das CORS-Paket, um die Cross-Origin-Ressourcenfreigabe zu ermöglichen
 const winston = require("winston");
 const path = require("path");
 const bodyParser = require("body-parser");
 
+// Erstelle einen Logger mit winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
@@ -16,58 +17,61 @@ const logger = winston.createLogger({
   ],
 });
 
-// Create an instance of the Express application
+// Erstelle eine Instanz der Express-Anwendung
 const app = express();
 
-// Import the Mongoose library for MongoDB database connectivity
+// Importiere die Mongoose-Bibliothek für die Verbindung zur MongoDB-Datenbank
 const mongoose = require("mongoose");
-mongoose.set("strictQuery", false); // Set the strictQuery option to false to allow for looser queries
+mongoose.set("strictQuery", false); // Setze die Option strictQuery auf false, um weniger strenge Abfragen zu ermöglichen
 
-// Connect to the MongoDB database using the DATABASE_URL environment variable
+// Verbinde zur MongoDB-Datenbank mit der Umgebungsvariable DATABASE_URL
 mongoose.connect(process.env.MONGODB_CONN, { useNewUrlParser: true });
 const db = mongoose.connection;
-db.on("error", (error) => logger.error(error)); // Log any connection errors
-db.once("open", () => console.log("Connected to Database")); // Log a message when the connection is established
+db.on("error", (error) => logger.error(error)); // Protokolliere Verbindungsfehler
+db.once("open", () => console.log("Connected to Database")); // Protokolliere eine Nachricht, wenn die Verbindung hergestellt ist
 
-// Use the Express.json() middleware to parse incoming request data as JSON
+// Verwende das Express.json() Middleware, um eingehende Anfragedaten als JSON zu parsen
 app.use(express.json());
 logger.info(
-  "Use the Express.json() middleware to parse incoming request data as JSON"
+  "Verwende das Express.json() Middleware, um eingehende Anfragedaten als JSON zu parsen"
 );
 
+// Verwende CORS-Middleware
 app.use(cors());
-logger.info("Use cors");
+logger.info("Verwende CORS");
 
+// Verwende bodyParser.urlencoded, um URL-codierte Anfragedaten zu parsen
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Fehlerbehandlungs-Middleware
 app.use((err, req, res, next) => {
-  // Log the error
+  // Protokolliere den Fehler
   logger.error(err);
 
-  // Send an error response to the client
+  // Sende eine Fehlerantwort an den Client
   res.status(500).json({ message: "Internal server error" });
 });
 
-
-// Set up the user and appointment routes using their respective routers
+// Richte die Benutzer- und Terminrouten mit ihren jeweiligen Routern ein
 const loginRouter = require("./routing/login");
 app.use("/login", loginRouter);
-logger.info("Setting up login route");
+logger.info("Richte Login-Route ein");
 
 const tableRouter = require("./routing/table");
 app.use("/table", tableRouter);
-logger.info("Setting up table route");
+logger.info("Richte Tabellen-Route ein");
 
-
+// Stelle statische Dateien aus dem Frontend-Verzeichnis bereit
 app.use(
   "/static",
   express.static(path.resolve(__dirname, "frontend", "static"))
 );
 
+// Verarbeite alle anderen Anfragen und sende die index.html-Datei
 app.get("/*", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.sendFile(path.resolve(__dirname, "frontend", "index.html"));
 });
 
-// Set up the server to listen on port 3000
+// Richte den Server ein, um auf Port 3000 zu lauschen
 app.listen(process.env.PORT, () => console.log("Connected to Server"));
